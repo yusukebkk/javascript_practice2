@@ -2,33 +2,25 @@
 {
   //タスクの通し番号を定義
   let taskId = 0;
-  //ラジオボタンで「全て」をクリックした場合
-  document.querySelector('input[value="all"]').addEventListener('click',() => {
-    //全てのtrからhideクラスを削除
+  //リストの表示を変える関数
+  const taskFilter = status => {
     Array.from(document.querySelectorAll('tr'), tr => {
       tr.classList.remove('hide');
     });
-  });
-  //ラジオボタンで「作業中」をクリックした場合
-  document.querySelector('input[value="working"]').addEventListener('click',() => {
-    //全てのtrからhideクラスを削除
-    Array.from(document.querySelectorAll('tr'), tr => {
-      tr.classList.remove('hide');
-    });
-    //「完了」を除外
-    Array.from(document.querySelectorAll('tr.complete'), tr => {
-      tr.classList.add('hide');
-    });
-  });
-  //ラジオボタンで「完了」をクリックした場合
-  document.querySelector('input[value="complete"]').addEventListener('click',() => {
-    //全てのtrからhideクラスを削除
-    Array.from(document.querySelectorAll('tr'), tr => {
-      tr.classList.remove('hide');
-    });
-    //「作業中」を除外
-    Array.from(document.querySelectorAll('tr.working'), tr => {
-      tr.classList.add('hide');
+    if (status === 'working'){
+      Array.from(document.querySelectorAll('tr.complete'), tr => {
+        tr.classList.add('hide');
+      });
+    }else if (status === 'complete'){
+      Array.from(document.querySelectorAll('tr.working'), tr => {
+        tr.classList.add('hide');
+      });
+    }
+  }
+  //ラジオボタンをクリックした場合にstatusの中身を取得してリスト表示を変える関数を実行
+  Array.from(document.querySelectorAll('input[name="status"]'), input => {
+    input.addEventListener('click', e => {
+      taskFilter(e.target.value);
     });
   });
   //タスクを追加する機能
@@ -41,24 +33,39 @@
       document.getElementById('task').value = '';
       //タスクIDの変更
       taskId += 1;
-      //タスク部分のhtml作成
-      const task_html = `<tr class="working" data-task-id = "${taskId}" ><td>${taskId}</td><td>${taskStr}</td><td><button class="working-status-button">作業中</button><button class="delete-button">削除</button></td></tr>`;
-      //htmlを埋め込む
-      document.querySelector('table').insertAdjacentHTML('beforeend',task_html);
-      //作業中ボタンのクリック時のイベント設定
-      document.querySelector(`tr[data-task-id='${taskId}'] >td:nth-child(3) >button:nth-child(1)`).addEventListener('click',function(e){
-        //ボタンのテキストを完了に変更
-        e.target.textContent = '完了';
-        //親の親要素からworkingクラスを削除
-        e.target.parentElement.parentElement.classList.remove('working');
-        //親の親要素にcompleteクラスを追加
-        e.target.parentElement.parentElement.classList.add('complete');
+      //タスク部分のDOM作成
+      const task = document.createElement('tr');
+      const taskIdArea = document.createElement('td');
+      taskIdArea.textContent = taskId;
+      const taskTextArea = document.createElement('td');
+      taskTextArea.textContent = taskStr;
+      const buttonArea = document.createElement('td');
+      //作業の状態を表すボタンを作成して初期化
+      const statusButton = document.createElement('button');
+      statusButton.textContent = '作業中';
+      task.classList.add("working");
+      //ボタンを押した際にタスクの状態を入れ替える
+      statusButton.addEventListener('click', () => {
+        task.classList.toggle('working');
+        task.classList.toggle('complete');
+        if (statusButton.textContent === '作業中'){
+          statusButton.textContent = '完了';
+        }else{
+          statusButton.textContent = '作業中';
+        }
       });
-      //削除ボタンのクリック時のイベント設定
-      document.querySelector(`tr[data-task-id='${taskId}'] >td:nth-child(3) >button:nth-child(2)`).addEventListener('click',function(e){
-        //ボタンの親の親要素を削除
-        e.target.parentElement.parentElement.remove();
+      //削除ボタンの作成
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent ='削除';
+      deleteButton.addEventListener('click', () => {
+        task.remove();
       });
+      buttonArea.appendChild(statusButton);
+      buttonArea.appendChild(deleteButton);
+      task.appendChild(taskIdArea);
+      task.appendChild(taskTextArea);
+      task.appendChild(buttonArea);
+      document.querySelector('table').appendChild(task);
     }
   });
 }
