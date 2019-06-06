@@ -3,63 +3,79 @@
   //タスクの通し番号を定義
   let taskId = 0;
   //リストの表示を変える関数
-  const taskFilter = status => {
-    Array.from(document.querySelectorAll('tr'), tr => {
+  const changeList = status => {
+    const trAll = document.querySelectorAll('tr');
+    Array.from(trAll, tr => {
       tr.classList.remove('hide');
     });
     if (status === 'working'){
-      Array.from(document.querySelectorAll('tr.complete'), tr => {
+      const trComplete = document.querySelectorAll('tr.complete');
+      Array.from(trComplete, tr => {
         tr.classList.add('hide');
       });
     }else if (status === 'complete'){
-      Array.from(document.querySelectorAll('tr.working'), tr => {
+      const trWorking = document.querySelectorAll('tr.working');
+      Array.from(trWorking, tr => {
         tr.classList.add('hide');
       });
     }
   }
+
   //ラジオボタンをクリックした場合にstatusの中身を取得してリスト表示を変える関数を実行
-  Array.from(document.querySelectorAll('input[name="status"]'), input => {
-    input.addEventListener('click', e => {
-      taskFilter(e.target.value);
+  const statusRadioButtons  = document.querySelectorAll('input[name="status"]');
+  Array.from(statusRadioButtons, statusRadioButton => {
+    statusRadioButton.addEventListener('click', e => {
+      const status = e.target.value;
+      changeList(status);
     });
   });
+
+  //削除ボタン作成
+  const createDeleteButton = task => {
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent ='削除';
+    deleteButton.addEventListener('click', () => {
+      task.remove();
+    });
+    return deleteButton;
+  }
+
+  //状態ボタン作成
+  const createStatusButton = task => {
+    const statusButton = document.createElement('button');
+    statusButton.textContent = '作業中';
+    task.classList.add("working");
+    //ボタンを押した際にタスクの状態を入れ替える
+    statusButton.addEventListener('click', () => {
+      task.classList.toggle('working');
+      task.classList.toggle('complete');
+      if (statusButton.textContent === '作業中'){
+        statusButton.textContent = '完了';
+      }else{
+        statusButton.textContent = '作業中';
+      }
+    });
+    return statusButton;
+  }
+
   //タスクを追加する機能
   document.getElementById('submit').addEventListener('click',() => {
-    //フォームからタスクの中身を取得
-    const taskStr = document.getElementById('task').value;
+    //フォームからタスクの中身を含む要素を取得
+    const taskForm = document.getElementById('task');
     //フォームの中身チェック
-    if (taskStr !== ''){
-      //フォームの中身を初期化
-      document.getElementById('task').value = '';
-      //タスクIDの変更
+    if (taskForm.value !== ''){
+      taskStr = taskForm.value
+      taskForm.value = '';
       taskId += 1;
       //タスク部分のDOM作成
       const task = document.createElement('tr');
       const taskIdArea = document.createElement('td');
-      taskIdArea.textContent = taskId;
       const taskTextArea = document.createElement('td');
-      taskTextArea.textContent = taskStr;
       const buttonArea = document.createElement('td');
-      //作業の状態を表すボタンを作成して初期化
-      const statusButton = document.createElement('button');
-      statusButton.textContent = '作業中';
-      task.classList.add("working");
-      //ボタンを押した際にタスクの状態を入れ替える
-      statusButton.addEventListener('click', () => {
-        task.classList.toggle('working');
-        task.classList.toggle('complete');
-        if (statusButton.textContent === '作業中'){
-          statusButton.textContent = '完了';
-        }else{
-          statusButton.textContent = '作業中';
-        }
-      });
-      //削除ボタンの作成
-      const deleteButton = document.createElement('button');
-      deleteButton.textContent ='削除';
-      deleteButton.addEventListener('click', () => {
-        task.remove();
-      });
+      const deleteButton = createDeleteButton(task);
+      const statusButton = createStatusButton(task);
+      taskIdArea.textContent = taskId;
+      taskTextArea.textContent = taskStr;
       buttonArea.appendChild(statusButton);
       buttonArea.appendChild(deleteButton);
       task.appendChild(taskIdArea);
