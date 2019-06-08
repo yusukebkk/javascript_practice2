@@ -30,6 +30,12 @@
     });
   });
 
+  //チェックボタンの状態を取得する
+  const getRadioButtonStatus = ()=> {
+    const status = document.querySelector('input[name="status"]:checked').value;
+    return status;
+  }
+
   //削除ボタン作成
   const createDeleteButton = task => {
     const deleteButton = document.createElement('button');
@@ -97,7 +103,7 @@
       task.appendChild(taskTextArea);
       task.appendChild(buttonArea);
       document.querySelector('table').appendChild(task);
-
+      changeList(getRadioButtonStatus());
     }
   });
 }
