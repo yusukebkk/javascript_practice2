@@ -36,8 +36,23 @@
     deleteButton.textContent ='削除';
     deleteButton.addEventListener('click', () => {
       task.remove();
+      updateId();
     });
     return deleteButton;
+  }
+
+  //番号振り直す
+  const updateId = () => {
+    const taskList = document.querySelectorAll('tr');
+    taskId = 0
+    Array.from(taskList, tr => {
+      //最初の列は見出しなのでスルー
+      if (taskId !== 0){
+        tr.querySelector('td').textContent = taskId;
+      }
+      taskId++;
+    });
+    taskId--;
   }
 
   //状態ボタン作成
@@ -82,6 +97,7 @@
       task.appendChild(taskTextArea);
       task.appendChild(buttonArea);
       document.querySelector('table').appendChild(task);
+
     }
   });
 }
